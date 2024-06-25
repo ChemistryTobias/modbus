@@ -471,8 +471,8 @@ void drvModbusAsyn::report(FILE *fp, int details)
         fprintf(fp, "    asynOctet server:   %s\n", octetPortName_);
         fprintf(fp, "    modbusSlave:        %d\n", modbusSlave_);
         fprintf(fp, "    modbusFunction:     %d\n", modbusFunction_);
-        fprintf(fp, "    modbusStartAddress: 0%o\n", modbusStartAddress_);
-        fprintf(fp, "    modbusLength:       0%o\n", modbusLength_);
+        fprintf(fp, "    modbusStartAddress: %d\n", modbusStartAddress_);
+        fprintf(fp, "    modbusLength:       %d\n", modbusLength_);
         fprintf(fp, "    absoluteAddressing: %s\n", absoluteAddressing_ ? "true" : "false");
         fprintf(fp, "    dataType:           %d (%s)\n", dataType_, modbusDataTypes[dataType_].dataTypeString);
         fprintf(fp, "    plcType:            %s\n", plcType_);
@@ -551,7 +551,7 @@ asynStatus drvModbusAsyn::readUInt32Digital(asynUser *pasynUser, epicsUInt32 *va
         }
         asynPrint(pasynUserSelf, ASYN_TRACEIO_DRIVER,
                   "%s::%s port %s function=0x%x,"
-                  " offset=0%o, mask=0x%x, value=0x%x\n",
+                  " offset=%d, mask=0x%x, value=0x%x\n",
                   driverName, functionName, this->portName, modbusFunction_,
                   offset, mask, *value);
         return asynSuccess;
@@ -618,7 +618,7 @@ asynStatus drvModbusAsyn::writeUInt32Digital(asynUser *pasynUser, epicsUInt32 va
         }
         asynPrint(pasynUserSelf, ASYN_TRACEIO_DRIVER,
               "%s::%s port %s function=0x%x,"
-              " address=0%o, mask=0x%x, value=0x%x\n",
+              " address=%d, mask=0x%x, value=0x%x\n",
               driverName, functionName, this->portName, modbusFunction_,
               modbusAddress, mask, data);
     }
@@ -704,7 +704,7 @@ asynStatus drvModbusAsyn::readInt32 (asynUser *pasynUser, epicsInt32 *value)
         }
         asynPrint(pasynUserSelf, ASYN_TRACEIO_DRIVER,
               "%s::%s port %s function=0x%x,"
-              " offset=0%o, value=0x%x\n",
+              " offset=%d, value=0x%x\n",
               driverName, functionName, this->portName, modbusFunction_,
               offset, *value);
         return asynSuccess;
@@ -774,7 +774,7 @@ asynStatus drvModbusAsyn::writeInt32(asynUser *pasynUser, epicsInt32 value)
         }
         asynPrint(pasynUserSelf, ASYN_TRACEIO_DRIVER,
             "%s::%s port %s function=0x%x,"
-            " modbusAddress=0%o, buffer[0]=0x%x, bufferLen=%d\n",
+            " modbusAddress=%d, buffer[0]=0x%x, bufferLen=%d\n",
             driverName, functionName, this->portName, modbusFunction_,
             modbusAddress, buffer[0], bufferLen);
     }
@@ -864,7 +864,7 @@ asynStatus drvModbusAsyn::readInt64 (asynUser *pasynUser, epicsInt64 *value)
         }
         asynPrint(pasynUserSelf, ASYN_TRACEIO_DRIVER,
               "%s::%s port %s function=0x%x,"
-              " offset=0%o, value=0x%llx\n",
+              " offset=%d, value=0x%llx\n",
               driverName, functionName, this->portName, modbusFunction_,
               offset, *value);
         return asynSuccess;
@@ -934,7 +934,7 @@ asynStatus drvModbusAsyn::writeInt64(asynUser *pasynUser, epicsInt64 value)
         }
         asynPrint(pasynUserSelf, ASYN_TRACEIO_DRIVER,
             "%s::%s port %s function=0x%x,"
-            " modbusAddress=0%o, buffer[0]=0x%x, bufferLen=%d\n",
+            " modbusAddress=%d, buffer[0]=0x%x, bufferLen=%d\n",
             driverName, functionName, this->portName, modbusFunction_,
             modbusAddress, buffer[0], bufferLen);
     }
@@ -1009,7 +1009,7 @@ asynStatus drvModbusAsyn::readFloat64 (asynUser *pasynUser, epicsFloat64 *value)
         }
         asynPrint(pasynUserSelf, ASYN_TRACEIO_DRIVER,
               "%s::%s port %s function=0x%x,"
-              " offset=0%o, value=%f, status=%d\n",
+              " offset=%d, value=%f, status=%d\n",
               driverName, functionName, this->portName, modbusFunction_,
               offset, *value, status);
     }
@@ -1078,7 +1078,7 @@ asynStatus drvModbusAsyn::writeFloat64 (asynUser *pasynUser, epicsFloat64 value)
         }
         asynPrint(pasynUserSelf, ASYN_TRACEIO_DRIVER,
                   "%s::%s port %s function=0x%x,"
-                  " modbusAddress=0%o, buffer[0]=0x%x\n",
+                  " modbusAddress=%d, buffer[0]=0x%x\n",
                   driverName, functionName, this->portName, modbusFunction_,
                   modbusAddress, buffer[0]);
     }
@@ -1846,7 +1846,7 @@ asynStatus drvModbusAsyn::doModbusIO(int slave, int function, int start,
             replySize = sizeof(modbusWriteSingleResponse);
             asynPrint(pasynUserSelf, ASYN_TRACEIO_DRIVER,
                       "%s::%s port %s WRITE_SINGLE_COIL"
-                      " address=0%o value=0x%x\n",
+                      " address=%d value=0x%x\n",
                       driverName, functionName, this->portName, start, bitOutput);
             break;
         case MODBUS_WRITE_SINGLE_REGISTER:
@@ -1860,7 +1860,7 @@ asynStatus drvModbusAsyn::doModbusIO(int slave, int function, int start,
             replySize = sizeof(modbusWriteSingleResponse);
             asynPrint(pasynUserSelf, ASYN_TRACEIO_DRIVER,
                       "%s::%s port %s WRITE_SINGLE_REGISTER"
-                      " address=0%o value=0x%x\n",
+                      " address=%d value=0x%x\n",
                       driverName, functionName, this->portName, start, *data);
             break;
         case MODBUS_WRITE_MULTIPLE_COILS:
