@@ -2,14 +2,14 @@ Creating a **modbus** port driver
 ---------------------------------
 
 Before **modbus** port drivers can be created, it is necessary to first
-create at least one asyn TCP/IP or serial port driver to communicate
+create at least one asyn TCP/IP, UDP/IP or serial port driver to communicate
 with the hardware. The commands required depend on the communications
 link being used.
 
-TCP/IP
-~~~~~~
+TCP/IP UDP/IP
+~~~~~~~~~~~~~
 
-For TCP/IP use the following standard asyn command:
+For TCP/IP or UDP/IP use the following standard asyn command:
 
 ::
 
@@ -31,6 +31,7 @@ the asynInterpose interface does no harm.
 However, the asynInterposeEos interface is definitely needed when using drvAsynIPPortConfigure to talk 
 to a terminal server that is communicating with the Modbus device over Modbus RTU or ASCII, 
 because then the communication from the device may well be broken up into multiple packets.
+To use UDP rather than TCP, add " UDP" after the host name/number and optional port number.
 
 ::
 
@@ -105,7 +106,7 @@ modbusInterposeConfig
 After creating the asynIPPort or asynSerialPort driver, the next step is
 to add the asyn "interpose interface" driver. This driver takes the
 device-independent Modbus frames and adds or removes the
-communication-link specific information for the TCP, RTU, or ASCII link
+communication-link specific information for the TCP, UDP, RTU, or ASCII link
 protocols. The interpose driver is created with the command:
 
 ::
@@ -128,7 +129,7 @@ protocols. The interpose driver is created with the command:
     - Name of the asynIPPort or asynSerialPort previously created.
   * - linkType
     - int
-    - Modbus link layer type:, 0 = TCP/IP, 1 = RTU, 2 = ASCII
+    - Modbus link layer type:, 0 = TCP/IP, 1 = RTU, 2 = ASCII, 3 = UDP/IP
   * - timeoutMsec
     - int
     - The timeout in milliseconds for write and read operations to the underlying asynOctet
@@ -186,12 +187,12 @@ created with the following command:
   * - slaveAddress
     - int
     - The address of the Modbus slave. This must match the configuration of the Modbus
-      slave (PLC) for RTU and ASCII. For TCP the slave address is used for the "unit identifier",
+      slave (PLC) for RTU and ASCII. For TCP or UDP the slave address is used for the "unit identifier",
       the last field in the MBAP header. The "unit identifier" is ignored by most PLCs,
       but may be required by some.
   * - modbusFunction
     - int
-    - Modbus function code (1, 2, 3, 4, 5, 6, 15, 16, 123 (for 23 read-only), or 223 (for
+    - Modbus function code (1, 2, 3, 4, 5, 6, 15, 16, 17, 123 (for 23 read-only), or 223 (for
       23 write-only)).
   * - modbusStartAddress
     - int
@@ -202,13 +203,13 @@ created with the following command:
     - int
     - The length of the Modbus data segment to be accessed. 
       This is specified in bits for Modbus functions 1, 2, 5 and 15.
-      It is specified in 16-bit words for Modbus functions 3, 4, 6, 16, or 23.
+      It is specified in 16-bit words for Modbus functions 3, 4, 6, 16, 17, or 23.
       Length limit is 2000 for functions 1 and 2, 1968 for functions 5 and 15, 125 for functions 3 and 4, 
-      and 123 for functions 6, 16, and 23.
+      and 123 for functions 6, 16, 17, and 23.
       For absolute addressing this must be set to the size of required by the largest
       single Modbus operation that may be used. This would be 1 if all Modbus reads and
       writes are for 16-bit registers, but it would be 4 if 64-bit floats (4 16-bit registers)
-      are being used, and 100 (for example) if an Int32 waveform record with NELM=100
+      are being used, and 100 (for example) if an Int32 waveform record with NELM=50
       is being read or written.
   * - modbusDataType
     - string
@@ -217,8 +218,10 @@ created with the following command:
       data type strings are listed in the table below. This argument can either be one of the
       strings shown in the table below, and defined in `drvModbusAsyn.h`, or it can be the
       numeric `modbusDataType_t` enum also defined in `drvModbusAsyn.h`.  The enum values
-      are supported for backwards compatibility, but they are less convenient and understandable
-      then the string equivalents.
+      are less convenient and understandable then the string equivalents. 
+      NOTE: the enum values changed between R3-0 and R3-1, which may require changes
+      to startup scripts.  INT16 and UINT16 were swapped and everything beyond
+      INT32_LE is different.
   * - pollMsec
     - int
     - Polling delay time in msec for the polling thread for read functions.
@@ -258,8 +261,9 @@ treats the registers as unsigned 16-bit integers.
 
   * - drvUser field
     - Description
-  * - UINT16
-    - Unsigned 16-bit binary integers.
+  * - INT16
+    - 16-bit signed (2's complement) integers. This data type extends the sign bit when
+      converting to epicsInt32.
   * - INT16SM
     - 16-bit binary integers, sign and magnitude format. In this format bit 15 is the
       sign bit, and bits 0-14 are the absolute value of the magnitude of the number. This
@@ -273,9 +277,8 @@ treats the registers as unsigned 16-bit integers.
       consisting of 3 4-bit nibbles, and one 3-bit nibble. Bit 15 is a sign bit. Signed
       BCD numbers can hold values from -7999 to +7999. This is one of the formats used
       by Koyo PLCs for numbers such as ADC conversions.
-  * - INT16
-    - 16-bit signed (2's complement) integers. This data type extends the sign bit when
-      converting to epicsInt32.
+  * - UINT16
+    - Unsigned 16-bit binary integers.
   * - INT32_LE
     - 32-bit integers, little endian (least significant word at Modbus address N, most
       significant word at Modbus address N+1).
