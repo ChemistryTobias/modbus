@@ -379,8 +379,8 @@ static asynStatus readIt(void *ppvt, asynUser *pasynUser,
             computeCRC(pPvt->buffer, (int)nbytesActual, &CRC_Lo, &CRC_Hi);
             if ((CRC_Lo != 0) || (CRC_Hi != 0)) {
                 asynPrint(pasynUser, ASYN_TRACE_ERROR,
-                          "%s::readIt, CRC error\n",
-                          driver);
+                          "%s::readIt, CRC error, should be [0x0,0x0], actual=[0x%x,0x%x]\n",
+                          driver, CRC_Lo, CRC_Hi);
                 return asynError;
             }
             /* Copy bytes beyond address to output buffer */
